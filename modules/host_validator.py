@@ -28,4 +28,5 @@ def main():
     print(hostIp_hostIP(url))
 
 if __name__ == '__main__':
+    print('app start')
     main()
