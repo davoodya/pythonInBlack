@@ -1,6 +1,7 @@
 import socket
+import validators
 
-def hostIp_hostIP(url):
+def get_host_ip(url):
                 # One Line url Schema Remover
     url = url[8:] if url.startswith('https://') else url[7:] if url.startswith('http://') else url
 
@@ -23,10 +24,22 @@ def hostIp_hostIP(url):
         print(f'Unhandled Error: {e}')
         return False
 
-def main():
-    url = input('Input url(Host) to Obtain IP: ')
-    print(hostIp_hostIP(url))
+def host_validator(url):
+    status = validators.url(url)
+    result = f"Schema OK" if status else f'Schema ERROR'
+    return result
 
+
+
+
+
+def main():
+
+    url = input('Input url(Host) to Obtain IP: ')
+    print(f'Host IP: {get_host_ip(url)}')
+    print(host_validator(url))
+
+    
 if __name__ == '__main__':
     print('app start')
     main()
