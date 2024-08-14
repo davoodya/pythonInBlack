@@ -1,4 +1,4 @@
-from modules import get_services
+from modules import enumerator
 from modules import translator
 from modules import banner_print
 from modules import dir_buster
@@ -10,7 +10,7 @@ def main():
     if option == 1:
         dir_buster.dir_buster()
     elif option == 2:
-        get_services.get_services()
+        enumerator.get_services()
     elif option == 3:
         translator.translator()
 
