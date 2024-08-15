@@ -29,8 +29,14 @@ import os
 #print(test)
 
 
-res = '</pre>]'
+res = '''[<div class="nooverflow" id="ResultData">
+<h3 class="ls1 t400 h2long">Response Content</h3><pre class="brush: html; toolbar: false; wrap-lines: true;">
+{"ok":true,"result":[{"update_id":679218537,
+"message":{"message_id":17,"from":{"id":673330561,"is_bot":false,"first_name":"Daya","last_name":"Yahay","username":"Davoodyahay","language_code":"en"},"chat":{"id":673330561,"first_name":"Daya","last_name":"Yahay","username":"Davoodyahay","type":"private"},"date":1723755156,"text":"/none","entities":[{"offset":0,"length":5,"type":"bot_command"}]}}]}
+</pre>
+</div>]'''
 
-res2 = '[<pre class="brush: html; toolbar: false; wrap-lines: true;">'
+res2 = '2long">Response Content</h3><pre class="brush: html; toolbar: false; wrap-lines: true;">'
 #print(len(res))
-print(res[61:7])
+print(res[151:-14])
+print(len(res2))
