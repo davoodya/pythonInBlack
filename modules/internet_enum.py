@@ -176,9 +176,11 @@ class InternetEnumer():
         
         try:
             with open(r'../wordlists/userstop.txt','r+') as userNames, \
-                open(r'../wordlists/passwords1000.txt','r+') as passwords:
-                    userFile = [line.strip() for line in userNames]
+                open(r'../wordlists/passwords10000.txt','r+') as passwords:
+                    userFile = [line.strip() for line in userNames] 
                     passFile =[line.strip() for line in passwords]
+                    #for line in userNames:
+                        #userFile = line.strip()
                 
         except FileNotFoundError:
             print(Fore.LIGHTRED_EX + '[-] Http Bruteforcer: File Not Found!!!'+Style.RESET_ALL)
@@ -234,7 +236,7 @@ class InternetEnumer():
                 print(f'Error Content: {e}')
                 return None
         
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=24) as executor:
             futures = [executor.submit(attempt_login,user,passwd) for user in userFile for passwd in passFile]
             
             for future in concurrent.futures.as_completed(futures):

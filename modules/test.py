@@ -1,4 +1,5 @@
-
+import bs4
+from bs4 import BeautifulSoup as soupy
 import subprocess  
 import webbrowser  
 import os
@@ -29,14 +30,38 @@ import os
 #print(test)
 
 
-res = '''[<div class="nooverflow" id="ResultData">
+'''res = [<div class="nooverflow" id="ResultData">
 <h3 class="ls1 t400 h2long">Response Content</h3><pre class="brush: html; toolbar: false; wrap-lines: true;">
 {"ok":true,"result":[{"update_id":679218537,
 "message":{"message_id":17,"from":{"id":673330561,"is_bot":false,"first_name":"Daya","last_name":"Yahay","username":"Davoodyahay","language_code":"en"},"chat":{"id":673330561,"first_name":"Daya","last_name":"Yahay","username":"Davoodyahay","type":"private"},"date":1723755156,"text":"/none","entities":[{"offset":0,"length":5,"type":"bot_command"}]}}]}
 </pre>
-</div>]'''
+</div>]
 
 res2 = '2long">Response Content</h3><pre class="brush: html; toolbar: false; wrap-lines: true;">'
 #print(len(res))
 print(res[151:-14])
-print(len(res2))
+print(len(res2))'''
+
+
+
+
+
+
+with open(r'../resources/index.html','r') as htmlFile:
+    soup = soupy(htmlFile.read(),'html.parser')
+    divTags = soup.findAll('div', attrs={'class':'form-group'})
+    divTag = soup.findAll('div')[1]
+
+test = 'type="text"/>][<input class="form-control" id="password" placeholder="Enter your password" type="password"/>][]'
+inputs = ''
+print(len(test))
+for div in divTags:
+    inputs += str(div.findAll('input'))
+print(inputs[56:-114])
+#print(str(divTag))
+
+#divTags = soup.findAll('div',attrs={'class':'form-group'})
+#print(divTags)
+# for div in divTags:
+#     print(div.text)
+          
