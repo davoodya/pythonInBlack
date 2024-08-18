@@ -235,19 +235,41 @@ class InternetEnumer():
                 print(Fore.LIGHTRED_EX + '[-] Http Bruteforcer: Unknown Error in Login Attempt Function!!!\n'+Style.RESET_ALL)
                 print(f'Error Content: {e}')
                 return None
-        
-        with concurrent.futures.ThreadPoolExecutor(max_workers=24) as executor:
-            futures = [executor.submit(attempt_login,user,passwd) for user in userFile for passwd in passFile]
-            
-            for future in concurrent.futures.as_completed(futures):
-                resultTuple = future.result()
-                if resultTuple:
-                    user, passwd, success = resultTuple
-                    if success:
-                        result[f'Username {user}'] = f'Password: {passwd}'
-                    else:
-                        maybeResult[f'Username {user}'] = f'Password: {passwd}'
+        try:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=24) as executor:
+                futures = [executor.submit(attempt_login,user,passwd) for user in userFile for passwd in passFile]
+                
+                for future in concurrent.futures.as_completed(futures):
+                    resultTuple = future.result()
+                    if resultTuple:
+                        user, passwd, success = resultTuple
+                        if success:
+                            result[f'Username {user}'] = f'Password: {passwd}'
+                        else:
+                            maybeResult[f'Username {user}'] = f'Password: {passwd}'
+        except KeyboardInterrupt:
+            print(Fore.LIGHTRED_EX + f'[🥷] From Yakuza to Ninja: GoodBye & Goodluck 👋👋👋'+Style.RESET_ALL)
+            try:
+                #Write results in file in name result.txt until press CTRL+C
+                with open(r'../wordlists/results.txt','w') as resultFile:
+                    #Write Founded Credentials
+                    resultFile.write(f'Credentials Founded for {url}: {len(result)} => \n')
+                    for user,passwd in result.items():
+                        resultFile.write(f'Username: {user} , Password {passwd} \n')
                     
+                    #Write Maybe In-Doubt Credentials
+                    resultFile.write(f'Maybe In-Doubt Credentials Founded for {url}: {len(maybeResult)} => \n')
+                    for user, passwd in maybeResult.items():
+                        resultFile.write(f'Username: {user} , Password {passwd} \n')
+                    
+                    print(Fore.CYAN + '[+] Http Bruteforcer: Founded Credentials write to results.txt'+Style.RESET_ALL)
+            except Exception as e:
+                print(Fore.LIGHTRED_EX + '[-] Http Bruteforcer: Unknown Error when Writing to File!!!\n'+Style.RESET_ALL)
+        except Exception as e:
+            print(Fore.LIGHTRED_EX + '[-] Http Bruteforcer: Unknown Error in Processing !!!\n'+Style.RESET_ALL)
+            print(f'Error Content: {e}')
+            return False
+                        
                 
         #print result on screen
         print(Fore.YELLOW+f'Credentials Founded: {len(result)} => \n'+Style.RESET_ALL)
@@ -274,9 +296,8 @@ class InternetEnumer():
         
         #return result
         return result, maybeResult
-    
 
-        
+
     def subfinder(self):
         pass
 
