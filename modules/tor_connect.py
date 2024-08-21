@@ -51,3 +51,9 @@ def main():
         
 if __name__ == '__main__':
     main()
+
+'''TOR Configuration file for this scrip => 
+SOCKSPort 9999
+ControlPort 8888
+HashedControlPassword 16:EC10061D9381938260D8DECA1918C97E542DAD3DC57FF6A31BA8E7C863
+'''
