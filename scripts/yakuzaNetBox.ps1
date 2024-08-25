@@ -87,7 +87,7 @@ try {
         $optionListBox = New-Object System.Windows.Forms.ListBox
         $optionListBox.Location = New-Object System.Drawing.Point(10,50)
         $optionListBox.Size = New-Object System.Drawing.Size(260,250)
-        $optionListBox.Items.AddRange(@("All operations", "Ping", "Trace Route", "cURL", "Port Scan", "System Information", "Directory Busting", "Help", "Exit"))
+        $optionListBox.Items.AddRange(@("All operations", "Ping", "Trace Route", "cURL", "Port Scan", "System Information", "Directory Busting","V-Host Enumeration", "Help", "Exit"))
         $optionForm.Controls.Add($optionListBox)
 
         $okButton = New-Object System.Windows.Forms.Button
@@ -116,11 +116,17 @@ try {
                     if ([string]::IsNullOrWhiteSpace($target)) {
                         throw "No target entered. Exiting script."
                     }
-                    $targetIP = Get-IPAddress $target
+                    #$targetIP = Get-IPAddress $target
                     Write-Host "Target: $target" -ForegroundColor Cyan
                     Write-Host "Target IP: $targetIP" -ForegroundColor Cyan
-
                     Write-Host "All Operations Started..." -BackgroundColor Yellow -ForegroundColor Black 
+                    
+                    PING.EXE $target
+                    TRACERT.EXE $target
+                    curl.exe $target
+                    gsudo.exe nmap.exe -A -p- $target --unprivileged
+                    neofetch.cmd
+                    
                     
                     # ... (rest of case 0 operations)
                 }
@@ -186,6 +192,27 @@ try {
                     }
                 }
                 7 {
+                    $target = [Microsoft.VisualBasic.Interaction]::InputBox("Enter the target URL (with https://):", "V-Host Enumeration Target Input")
+                    if ([string]::IsNullOrWhiteSpace($target)) {
+                        throw "No target entered. Exiting script."
+                    }
+                    if (Test-ToolInstalled "gobuster") {
+                        Write-Host "V-Host Enumeration Start..." -ForegroundColor Yellow
+                        $defaultWordlist = "H:\Repo\black_python\mini_projects\wordlists\vhost-wordlist.txt"
+                        $customWordlist = [Microsoft.VisualBasic.Interaction]::InputBox("Enter the path to the wordlist (leave empty for default):", "Wordlist Selection")
+                        
+                        $wordlist = if ([string]::IsNullOrWhiteSpace($customWordlist)) { $defaultWordlist } else { $customWordlist }
+                        
+                        if (Test-Path $wordlist) {
+                            gobuster.exe vhost -u $target -w $wordlist
+                        } else {
+                            throw "Wordlist file not found: $wordlist"
+                        }
+                    } else {
+                        throw "Gobuster is not installed. Please install Gobuster and try again."
+                    }
+                }
+                8 {
                     Show-Help
                 }
                 default {
@@ -193,7 +220,7 @@ try {
                 }
             }
 
-            Show-CustomMessageBox "Operations completed successfully!" "Success"
+                    #Show-CustomMessageBox "Operations completed successfully!" "Success"
 
         }
         else
@@ -201,6 +228,7 @@ try {
             break
         }
     }
+    Show-CustomMessageBox "Operations completed successfully!" "Success"
 }
 catch {
     Write-Host "An error occurred: $_" -ForegroundColor Red
