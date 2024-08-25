@@ -1,7 +1,7 @@
 from colorama import Fore, Back, Style
 import requests
 import socket
-
+from banner_print import print_dir_banner 
 '''
 dirList = open('dirlist_small.txt', 'r').read()
 #dirListFormated = dirList.split('\n') 
@@ -28,7 +28,7 @@ def dir_buster():
                 print(Fore.CYAN + Style.BRIGHT + f'Exitting. Goodluck!! 👋 \n')
                 exit()
             elif inputList == "":
-                dirList = open('dirlist_medium.txt', 'r').read()
+                dirList = open(r'H:/Repo/black_python/mini_projects/wordlists/dirlist_medium.txt', 'r').read()
                 dirListFormated = dirList.splitlines() # Formating each word in new Line
                 #dirListFormated = dirList.split('\n')
             elif inputList != '':
@@ -115,8 +115,18 @@ def dir_buster():
             
 
 #test function dir_buster()
-dir_buster()
+def main():
+    try:
+        print_dir_banner()
+        input(Back.WHITE+Fore.BLACK+ "Welcom to 'Dir Bsuter' Ninja 🥷 "+ Back.RESET+Fore.LIGHTWHITE_EX+' Press Enter to Start...'+Style.RESET_ALL+'\n')
+        dir_buster()
+    except:
+        print(Fore.LIGHTRED_EX + '[-] CTRL+C Detecting => Exit !!!'+Style.RESET_ALL)
 
+if __name__ == '__main__':
+   main()
+   
+   
 #TODO
 # Fix Writing Result => Replace Line 67 to 104, 86
 # Add Options Menu for applet
