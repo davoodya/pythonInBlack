@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import html
+from security import safe_requests
 
 ''' parse_html_response() Summary
     Parses the HTML response from the given URL and extracts the networking commands from the cheat sheet.
@@ -80,7 +81,7 @@ def get_cheatsheet(cmd):
     #url2 = 'cheat.sh/python/built+in+methods' #get language methods cheatsheet
     #url2 = 'cheat.sh/nmap' #get commands cheatsheet
     try:
-        response = requests.get(f'{url}/{cmd}')
+        response = safe_requests.get(f'{url}/{cmd}')
         soup = BeautifulSoup(response.text, 'html.parser')
         if response.status_code == 200:
             print(response.text) #print(soup.prettify())

@@ -2,6 +2,8 @@ from colorama import Fore, Back, Style
 import requests
 import socket
 from banner_print import print_dir_banner 
+from security import safe_requests
+
 '''
 dirList = open('dirlist_small.txt', 'r').read()
 #dirListFormated = dirList.split('\n') 
@@ -59,7 +61,7 @@ def dir_buster():
         for word in dirListFormated: 
             try: # Formating URL and Send Request to URL with directory in file
                 url = inputUrl+'/'+word
-                response = requests.get(url)
+                response = safe_requests.get(url)
                 if response.status_code == 200:
                     print(Fore.GREEN + f'Directory found => {word} \n')
                     print(Fore.GREEN + f'Directory Full URL => {url} \n')

