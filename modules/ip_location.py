@@ -19,10 +19,13 @@ def print_banner():
     print(Style.RESET_ALL)
 
 def get_user_ip():
-    # Send a request to ipify to get the user's IP address
-    response = requests.get('https://api.ipify.org?format=json')
-    ip_data = response.json()
-    return ip_data['ip']
+    ipUser = input(Fore.GREEN + "Enter your IP address: " + Style.RESET_ALL)
+    return ipUser
+
+    # # Send a request to ipify to get the user's IP address
+    # response = requests.get('https://api.ipify.org?format=json')
+    # ip_data = response.json()
+    # return ip_data['ip']
 
 def get_ip_location(ip):
     # Send a request to ipapi to get the location data for the IP address
@@ -45,7 +48,7 @@ def main():
     print(f"{Fore.YELLOW}{Style.BRIGHT}Your IP Address: {Fore.WHITE}{ip}")
     
     # Get the location data for the IP address
-    location_data = get_ip_location(ip)
+    location_data = get_ip_location(str(ip))
     
     # Print the location data
     print_location_data(location_data)
