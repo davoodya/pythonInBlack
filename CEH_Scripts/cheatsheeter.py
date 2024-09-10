@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import html
+from colorama import Fore, Back, Style
 
 ''' parse_html_response() Summary
     Parses the HTML response from the given URL and extracts the networking commands from the cheat sheet.
@@ -9,6 +10,19 @@ import html
         None. Prints the command, description, and example for each networking command found in the cheat sheet.
         Skips lines that do not have exactly three tab-separated parts.
 '''
+yakuzaBanner = f"""{Fore.LIGHTRED_EX}
+╭╮╱╱╭╮╱╭╮              ...............{Fore.LIGHTBLUE_EX}
+┃╰╮╭╯┃╱┃┃              ....-*###+.....
+╰╮╰╯╭┻━┫┃╭┳╮╭┳━━━┳━━╮  ...%@@-.@@.....
+╱╰╮╭┫╭╮┃╰╯┫┃┃┣━━┃┃╭╮┃  ..*@@@%#*-  :..{Fore.CYAN}
+╱╱┃┃┃╭╮┃╭╮┫╰╯┃┃━━┫╭╮┃  ..=@@=..    :..
+╱╱╰╯╰╯╰┻╯╰┻━━┻━━━┻╯╰╯  .. =%:..  .....
+{Fore.YELLOW}Written By: D.Yakuza{Fore.RESET}   .... :.........
+{Fore.LIGHTRED_EX}you say DAYA  {Fore.RESET}
+"""
+
+
+
 def parse_html_response():
     testUrl = 'https://www.geeksforgeeks.org/linux-commands-cheat-sheet/'
     response = requests.get(testUrl)
@@ -92,7 +106,8 @@ def get_cheatsheet(cmd):
 
 
 def main():
-    command = input("Enter a command to get cheatsheet: ")
+    print(yakuzaBanner)
+    command = input(Back.LIGHTMAGENTA_EX+Fore.WHITE+"Enter a command to get cheatsheet: "+Style.RESET_ALL)
     get_cheatsheet(command)
     
 if __name__ == '__main__':
