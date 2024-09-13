@@ -27,7 +27,7 @@ def add_route():
 
     # Execute the command
     try:
-        subprocess.run(command, check=True, shell=True)
+        subprocess.run(command, check=True, shell=False)
         print(Fore.LIGHTGREEN_EX + "Route added successfully.")
     except subprocess.CalledProcessError as e:
         print(Fore.LIGHTRED_EX + f"Failed to add route: {e}")

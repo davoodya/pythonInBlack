@@ -30,7 +30,7 @@ class FileFinderMultiCore():
         #Way1 to get Partitions and shared objects on machine
         print(Fore.YELLOW+"---------Way 1----------=> Using subprocess.run(['net', 'share'])\n"+Fore.RESET)
 
-        result1 = subprocess.run(['net', 'share'], shell=True,stdout=subprocess.PIPE)
+        result1 = subprocess.run(['net', 'share'], shell=False, stdout=subprocess.PIPE)
         print(result1.stdout.decode())
         print(Fore.BLUE+"-----------------------------------------\n"+Fore.RESET)
 
@@ -38,7 +38,7 @@ class FileFinderMultiCore():
         #Way2 to get Partitions on machine
         print(Fore.YELLOW+"---------Way 2----------=> Using subprocess.Popen(['fsutil.exe', 'fsinfo', 'drives'])\n"+Fore.RESET)
 
-        result2 = subprocess.Popen(['fsutil.exe', 'fsinfo', 'drives'], shell=True,stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        result2 = subprocess.Popen(['fsutil.exe', 'fsinfo', 'drives'], shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         #formatedResult = result2.stdout.decode('utf-8')
         formatedResult = str(result2)
