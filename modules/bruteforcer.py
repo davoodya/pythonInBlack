@@ -7,10 +7,10 @@ class BruteForcer():
         self.url = 'https://dl.sabzlearn.ir/lab/pycrack-v1/login.php'
         self.data = {'username':'admin', 'password':'admin','sub':''}
         self.result = ''
-        self.response = requests.get(url, data=self.data)
+        self.response = requests.get(url, data=self.data, timeout=60)
     
     def send_request(self):
-        response = requests.post(self.url, data=self.data)
+        response = requests.post(self.url, data=self.data, timeout=60)
         self.result = str(response.text)
         return response.content.decode()
     

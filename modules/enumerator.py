@@ -23,7 +23,7 @@ class Enumerator():
     def get_system(self):
         osName = platform.uname()
         timeZone = time.tzname
-        ip = requests.get('https://api.ipify.org').text
+        ip = requests.get('https://api.ipify.org', timeout=60).text
         userName = getpass.getuser()
         password = getpass.getpass()
 

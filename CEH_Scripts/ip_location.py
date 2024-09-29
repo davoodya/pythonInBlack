@@ -20,13 +20,13 @@ def print_banner():
 
 def get_user_ip():
     # Send a request to ipify to get the user's IP address
-    response = requests.get('https://api.ipify.org?format=json')
+    response = requests.get('https://api.ipify.org?format=json', timeout=60)
     ip_data = response.json()
     return ip_data['ip']
 
 def get_ip_location(ip):
     # Send a request to ipapi to get the location data for the IP address
-    response = requests.get(f'https://ipapi.co/{ip}/json/')
+    response = requests.get(f'https://ipapi.co/{ip}/json/', timeout=60)
     location_data = response.json()
     return location_data
 

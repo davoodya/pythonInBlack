@@ -11,7 +11,7 @@ def audio_download(url):
     print(Fore.YELLOW+'Start Downloading Audio...'+Fore.RESET)
 
     try:
-        audioDL = requests.get(rf"{audioUrl}").content
+        audioDL = requests.get(rf"{audioUrl}", timeout=60).content
         print(Fore.LIGHTGREEN_EX+'Audio Downloaded Succesfully \n'+Fore.RESET)
         
         with open(r"./hiphop.mp3","wb") as f:
