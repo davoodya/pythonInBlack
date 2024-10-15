@@ -2,6 +2,7 @@ import subprocess
 from colorama import Fore, Style, init
 import pyfiglet
 import os
+from security import safe_command
 
 # Initialize colorama
 init(autoreset=True)
@@ -27,7 +28,7 @@ def add_route():
 
     # Execute the command
     try:
-        subprocess.run(command, check=True, shell=True)
+        safe_command.run(subprocess.run, command, check=True, shell=True)
         print(Fore.LIGHTGREEN_EX + "Route added successfully.")
     except subprocess.CalledProcessError as e:
         print(Fore.LIGHTRED_EX + f"Failed to add route: {e}")
