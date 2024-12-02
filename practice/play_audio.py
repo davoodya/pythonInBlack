@@ -1,7 +1,7 @@
-import requests
 import subprocess
 import os
 from colorama import Fore, Back, Style
+from security import safe_requests
 
 
 
@@ -11,7 +11,7 @@ def audio_download(url):
     print(Fore.YELLOW+'Start Downloading Audio...'+Fore.RESET)
 
     try:
-        audioDL = requests.get(rf"{audioUrl}").content
+        audioDL = safe_requests.get(rf"{audioUrl}").content
         print(Fore.LIGHTGREEN_EX+'Audio Downloaded Succesfully \n'+Fore.RESET)
         
         with open(r"./hiphop.mp3","wb") as f:

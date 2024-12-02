@@ -1,6 +1,7 @@
 import requests
 from colorama import init, Fore, Style, Back
 import pyfiglet
+from security import safe_requests
 
 # Initialize colorama
 init(autoreset=True)
@@ -26,7 +27,7 @@ def get_user_ip():
 
 def get_ip_location(ip):
     # Send a request to ipapi to get the location data for the IP address
-    response = requests.get(f'https://ipapi.co/{ip}/json/')
+    response = safe_requests.get(f'https://ipapi.co/{ip}/json/')
     location_data = response.json()
     return location_data
 

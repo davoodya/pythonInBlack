@@ -1,5 +1,6 @@
 import requests, time, getpass
 from colorama import Fore, Back, Style
+from security import safe_requests
 
 url = 'https://dl.sabzlearn.ir/lab/pycrack-v1/login.php'
 class BruteForcer():
@@ -7,7 +8,7 @@ class BruteForcer():
         self.url = 'https://dl.sabzlearn.ir/lab/pycrack-v1/login.php'
         self.data = {'username':'admin', 'password':'admin','sub':''}
         self.result = ''
-        self.response = requests.get(url, data=self.data)
+        self.response = safe_requests.get(url, data=self.data)
     
     def send_request(self):
         response = requests.post(self.url, data=self.data)
