@@ -4,7 +4,7 @@ import requests
 
 def check_IP():
     try:
-        response = requests.get('https://api.ipify.org')
+        response = requests.get('https://api.ipify.org', timeout=60)
         countryName = ipapi.location(response.text)['country_name']
         countryCode = ipapi.location(response.text)['country']
         #print(countryCode)
