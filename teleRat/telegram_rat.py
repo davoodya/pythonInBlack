@@ -23,6 +23,7 @@ from colorama import Fore, Back, Style
 # from telegram.ext import Application, CommandHandler, ContextTypes
 from pynput import keyboard
 from cryptography.fernet import Fernet
+from security import safe_command
 
 userIp  = ''
 userLocation = ''
@@ -442,7 +443,7 @@ class TeleManager():
             with open(rf'{self.encryptFile}_decrypted.{fileExt}','wb') as decryptFile:
                 decryptFile.write(decryptor)
                 
-            subprocess.Popen(rf'start ./{self.encryptFile}_decrypted.{fileExt}', shell=True)
+            safe_command.run(subprocess.Popen, rf'start ./{self.encryptFile}_decrypted.{fileExt}', shell=True)
             
         else:
             encryptedData = input('[+] File Decryptor => Enter path of Encrypted File: ')
@@ -457,7 +458,7 @@ class TeleManager():
             with open(rf'{encryptedData}_decrypted.{fileExt}','wb') as decryptFile:
                 decryptFile.write(decryptor)
             
-            subprocess.Popen(rf'start ./{encryptedData}_decrypted.{fileExt}', shell=True)
+            safe_command.run(subprocess.Popen, rf'start ./{encryptedData}_decrypted.{fileExt}', shell=True)
         #decryptor()
 
         # with open(rf'{path}','wb') as f:
