@@ -1,9 +1,9 @@
 import stem.control
 from stem import Signal
 import time
-import requests
 from colorama import Fore
 import argparse
+from security import safe_requests
 
 
 def ip_changer(password, control_port, socks_port, sleeptime):
@@ -25,7 +25,7 @@ def ip_changer(password, control_port, socks_port, sleeptime):
                 'https':f'socks5h://127.0.0.1:{socks_port}'
             }
 
-            ip = requests.get("http://httpbin.org/ip", proxies=proxies).json()['origin']
+            ip = safe_requests.get("http://httpbin.org/ip", proxies=proxies).json()['origin']
             print(Fore.GREEN+ ip +Fore.RESET)
 
 def main():

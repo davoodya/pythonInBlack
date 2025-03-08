@@ -12,6 +12,7 @@ import time
 from colorama import Fore, Back, Style, init
 from bs4 import BeautifulSoup
 import concurrent.futures
+from security import safe_requests
 
 class InternetEnumer():
     def __init__(self):
@@ -94,7 +95,7 @@ class InternetEnumer():
         reqUrl = f'https://api.viewdns.info/portscan/?host={url}&apikey={self.viewDnsToken}&output=json'
         #payload = {'host':url,'output':'json','apikey':self.viewDnsToken}
         try:
-            respose = requests.get(reqUrl).text
+            respose = safe_requests.get(reqUrl).text
             respose = json.loads(respose)
             
             result = {'openPorts':[],'closedPorts':[]}
@@ -136,7 +137,7 @@ class InternetEnumer():
         #secondReqUrl = 'https://www.scamadviser.com/check-website'
         
         try:
-            response = requests.get(reqUrl)
+            response = safe_requests.get(reqUrl)
             soup = BeautifulSoup(response.content.decode(),'html.parser')
 
             #Find div tag contain Result of Response
