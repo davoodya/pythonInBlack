@@ -25,7 +25,7 @@ yakuzaBanner = f"""{Fore.LIGHTRED_EX}
 
 def parse_html_response():
     testUrl = 'https://www.geeksforgeeks.org/linux-commands-cheat-sheet/'
-    response = requests.get(testUrl)
+    response = requests.get(testUrl, timeout=60)
     soup = BeautifulSoup(response.text, 'html.parser') #also use content
     
     networkingSection = soup.find('h2',string='6. Networking Commands')
@@ -94,7 +94,7 @@ def get_cheatsheet(cmd):
     #url2 = 'cheat.sh/python/built+in+methods' #get language methods cheatsheet
     #url2 = 'cheat.sh/nmap' #get commands cheatsheet
     try:
-        response = requests.get(f'{url}/{cmd}')
+        response = requests.get(f'{url}/{cmd}', timeout=60)
         soup = BeautifulSoup(response.text, 'html.parser')
         if response.status_code == 200:
             print(response.text) #print(soup.prettify())

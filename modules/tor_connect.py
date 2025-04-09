@@ -25,7 +25,7 @@ def ip_changer(password, control_port, socks_port, sleeptime):
                 'https':f'socks5h://127.0.0.1:{socks_port}'
             }
 
-            ip = requests.get("http://httpbin.org/ip", proxies=proxies).json()['origin']
+            ip = requests.get("http://httpbin.org/ip", proxies=proxies, timeout=60).json()['origin']
             print(Fore.GREEN+ ip +Fore.RESET)
 
 def main():

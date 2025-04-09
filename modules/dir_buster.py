@@ -59,7 +59,7 @@ def dir_buster():
         for word in dirListFormated: 
             try: # Formating URL and Send Request to URL with directory in file
                 url = inputUrl+'/'+word
-                response = requests.get(url)
+                response = requests.get(url, timeout=60)
                 if response.status_code == 200:
                     print(Fore.GREEN + f'Directory found => {word} \n')
                     print(Fore.GREEN + f'Directory Full URL => {url} \n')
