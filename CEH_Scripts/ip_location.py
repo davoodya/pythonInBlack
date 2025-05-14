@@ -11,43 +11,53 @@ def print_banner():
     small_banner = pyfiglet.figlet_format("Written by D.Yakuza", font="small")
 
     # Print the banners with color
-    print(f"{Fore.YELLOW}{Style.BRIGHT}"+main_banner)
-    #print(main_banner)
-    print(f"{Back.BLACK+Fore.WHITE}{Style.BRIGHT}"+small_banner+Style.RESET_ALL)
-    #print(small_banner)
-    print(f"{Back.WHITE+Fore.BLACK}{Style.BRIGHT}" + "=" * 50)
-    print(Style.RESET_ALL)
+    print(f"{Fore.YELLOW}{Style.BRIGHT}" + main_banner)
+    print(f"{Back.BLACK}{Fore.WHITE}{Style.BRIGHT}" + small_banner + Style.RESET_ALL)
+    print(f"{Back.WHITE}{Fore.BLACK}{Style.BRIGHT}" + "=" * 50 + Style.RESET_ALL)
 
-def get_user_ip():
-    # Send a request to ipify to get the user's IP address
-    response = requests.get('https://api.ipify.org?format=json')
-    ip_data = response.json()
-    return ip_data['ip']
+def get_ip_input():
+    ip_input = input(Fore.GREEN + "Enter IP address (or 1 for your current public IP): " + Style.RESET_ALL)
+    if ip_input.strip() == "1":
+        # Get the user's current public IP from ipify
+        try:
+            response = requests.get('https://api.ipify.org?format=json')
+            response.raise_for_status()
+            return response.json().get('ip')
+        except requests.RequestException as e:
+            print(f"{Fore.RED}Error retrieving current IP: {e}")
+            return None
+    else:
+        return ip_input.strip()
 
 def get_ip_location(ip):
-    # Send a request to ipapi to get the location data for the IP address
-    response = requests.get(f'https://ipapi.co/{ip}/json/')
-    location_data = response.json()
-    return location_data
+    try:
+        response = requests.get(f'https://ipapi.co/{ip}/json/')
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException as e:
+        print(f"{Fore.RED}Error retrieving location data: {e}")
+        return None
 
 def print_location_data(location_data):
-    # Print the location data with colors
+    if not location_data:
+        print(f"{Fore.RED}No location data available.")
+        return
+
     print(f"{Fore.CYAN}{Style.BRIGHT}\nIP Location Data:\n")
     for key, value in location_data.items():
         print(f"{Fore.MAGENTA}{Style.BRIGHT}{key.capitalize()}: {Fore.WHITE}{value}")
 
 def main():
-    # Print the banners
     print_banner()
+
+    ip = get_ip_input()
+    if not ip:
+        print(f"{Fore.RED}Invalid input. Exiting.")
+        return
+
+    print(f"{Fore.YELLOW}{Style.BRIGHT}Target IP Address: {Fore.WHITE}{ip}")
     
-    # Get the user's IP address
-    ip = get_user_ip()
-    print(f"{Fore.YELLOW}{Style.BRIGHT}Your IP Address: {Fore.WHITE}{ip}")
-    
-    # Get the location data for the IP address
     location_data = get_ip_location(ip)
-    
-    # Print the location data
     print_location_data(location_data)
 
 if __name__ == "__main__":
