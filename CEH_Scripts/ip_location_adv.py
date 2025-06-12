@@ -1,6 +1,7 @@
 import requests
 from colorama import init, Fore, Style, Back
 import pyfiglet
+from security import safe_requests
 
 # Initialize colorama
 init(autoreset=True)
@@ -31,7 +32,7 @@ def get_ip_input():
 
 def get_ip_location(ip):
     try:
-        response = requests.get(f'https://ipapi.co/{ip}/json/')
+        response = safe_requests.get(f'https://ipapi.co/{ip}/json/')
         response.raise_for_status()
         return response.json()
     except requests.RequestException as e:
