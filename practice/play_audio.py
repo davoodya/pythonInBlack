@@ -23,7 +23,7 @@ def audio_download(url):
         print(Fore.WHITE+f'{e} \n'+Fore.RESET)
 
     
-    subprocess.Popen(["start",r'./hiphop.mp3'],shell=True)
+    subprocess.Popen(["start",r'./hiphop.mp3'],shell=False)
     
 audioUrl = input(Back.YELLOW+Fore.BLACK+"Enter MP3 Audio URL: "+Style.RESET_ALL)
 audio_download(audioUrl)
