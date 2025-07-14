@@ -22,7 +22,7 @@ class InternetEnumer():
         try:
             reqUrl = 'https://domains.yougetsignal.com/domains.php'
             payload = {'remoteAddress':url, 'key':''}
-            response = requests.post(reqUrl, data=payload)
+            response = requests.post(reqUrl, data=payload, timeout=60)
             resAsDict = json.loads(response.content.decode())
             
             if resAsDict['status'] == 'Success':
@@ -56,7 +56,7 @@ class InternetEnumer():
             reqUrl = 'https://www.yougetsignal.com/tools/whois-lookup/php/get-whois-lookup-json-data.php'
             payload = {'remoteAddress':url}
             
-            response = json.loads(requests.post(reqUrl, data=payload).content.decode())
+            response = json.loads(requests.post(reqUrl, data=payload, timeout=60).content.decode())
             
             if response['status'] == 'Success':
                 #Formating whois result 
@@ -94,7 +94,7 @@ class InternetEnumer():
         reqUrl = f'https://api.viewdns.info/portscan/?host={url}&apikey={self.viewDnsToken}&output=json'
         #payload = {'host':url,'output':'json','apikey':self.viewDnsToken}
         try:
-            respose = requests.get(reqUrl).text
+            respose = requests.get(reqUrl, timeout=60).text
             respose = json.loads(respose)
             
             result = {'openPorts':[],'closedPorts':[]}
@@ -136,7 +136,7 @@ class InternetEnumer():
         #secondReqUrl = 'https://www.scamadviser.com/check-website'
         
         try:
-            response = requests.get(reqUrl)
+            response = requests.get(reqUrl, timeout=60)
             soup = BeautifulSoup(response.content.decode(),'html.parser')
 
             #Find div tag contain Result of Response
@@ -205,7 +205,7 @@ class InternetEnumer():
                     }
             
             try:
-                response = requests.post(url, data=payload)
+                response = requests.post(url, data=payload, timeout=60)
                 if 'error' in response.text or response.status_code == 404:
                     print(Fore.LIGHTRED_EX + f'[-] Http Bruteforcer: Wrong Credentials for {user}:{passwd}'+Style.RESET_ALL)
                     

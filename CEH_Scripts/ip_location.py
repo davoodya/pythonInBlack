@@ -20,7 +20,7 @@ def get_ip_input():
     if ip_input.strip() == "1":
         # Get the user's current public IP from ipify
         try:
-            response = requests.get('https://api.ipify.org?format=json')
+            response = requests.get('https://api.ipify.org?format=json', timeout=60)
             response.raise_for_status()
             return response.json().get('ip')
         except requests.RequestException as e:
@@ -31,7 +31,7 @@ def get_ip_input():
 
 def get_ip_location(ip):
     try:
-        response = requests.get(f'https://ipapi.co/{ip}/json/')
+        response = requests.get(f'https://ipapi.co/{ip}/json/', timeout=60)
         response.raise_for_status()
         return response.json()
     except requests.RequestException as e:
