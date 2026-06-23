@@ -28,7 +28,7 @@ def dir_buster():
                 print(Fore.CYAN + Style.BRIGHT + f'Exitting. Goodluck!! 👋 \n')
                 exit()
             elif inputList == "":
-                dirList = open(r'H:/Repo/black_python/mini_projects/wordlists/dirlist_medium.txt', 'r').read()
+                dirList = open(r'./wordlists/dirlist_medium.txt', 'r').read()
                 dirListFormated = dirList.splitlines() # Formating each word in new Line
                 #dirListFormated = dirList.split('\n')
             elif inputList != '':
